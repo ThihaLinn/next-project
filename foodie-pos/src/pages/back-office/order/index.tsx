@@ -1,10 +1,14 @@
 import CardOrder from "@/components/CardOrder";
-import { useAppSelector } from "@/store/app/hook";
+import { useAppDispatch, useAppSelector } from "@/store/app/hook";
+import { updateOrder } from "@/store/slice/OrderSlice";
+import { showSnackBar } from "@/store/slice/SnackBarSlice";
 import { OrderItem } from "@/types/order";
+import { formatCartItem } from "@/util/formatCartItem";
 import { Box, ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { Menu, orderItemStatus } from "@prisma/client";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 const index = () => {
   const router = useRouter();
@@ -12,22 +16,10 @@ const index = () => {
   const [value, setValue] = useState<orderItemStatus>(orderItemStatus.PENDING);
 
   //const orderItems: OrderItem[] = [];
-  let [orderItems, setOrderItems] = useState<OrderItem[]>([]);
 
-  orderItems = orderItems.filter((orderItem) => orderItem.status === value);
-
-  let orders = useAppSelector((state) => state.order.order);
-  //orders.
-
-  const order = orders[0];
-
-  console.log(order);
-
-  const orderCartItem = useAppSelector(
+  const orderCartItems = useAppSelector(
     (state) => state.orderCartItem.orderCartItem
-  ).filter((orderCartItem) => orderCartItem.orderId === order?.id);
-
-  console.log(orderCartItem);
+  );
 
   const orderCartItemMenus = useAppSelector(
     (state) => state.odreCartItemMenu.orderCartItemMenu
@@ -41,39 +33,33 @@ const index = () => {
 
   const addon = useAppSelector((state) => state.addon.addons);
 
-  if (order) {
-    for (let orderItem of orderCartItem) {
-      const orderCartItemMenu = orderCartItemMenus.find(
-        (orderCartItemMenu) =>
-          orderCartItemMenu.orderCartItemItemId === orderItem.id
-      );
+  let orderItems = formatCartItem(
+    orderCartItems,
+    orderCartItemMenus,
+    orderCartItemMenuAddon,
+    menus,
+    addon
+  );
 
-      const menu = menus.find((menu) => menu.id === orderCartItemMenu?.menuId);
+  const dispatch = useAppDispatch();
 
-      const orderCartItemMenuAddons = orderCartItemMenuAddon.filter(
-        (orderCartItemMenuAddon) =>
-          orderCartItemMenuAddon.orderCartItemMEnuId === orderCartItemMenu?.id
-      );
-
-      const addons = addon.filter((addon) =>
-        orderCartItemMenuAddons.map((addon) => addon.addonId).includes(addon.id)
-      );
-
-      orderItems.push({
-        id: orderItem.itemId,
-        menu: menu as Menu,
-        addons,
-        quantity: orderItem.quantity,
-        status: orderItem.status,
-      });
-    }
-  }
-
-  console.log(orderItems);
-
-  const handdleOrderItemUpdate = () => {
-    
-  }
+  const handdleOrderItemUpdate = (itemId: string, status: orderItemStatus) => {
+    dispatch(
+      updateOrder({
+        itemId,
+        status,
+        onSuccess: () => {
+          dispatch(
+            showSnackBar({
+              open: true,
+              type: "success",
+              message: "Update orderCartItem status successfully",
+            })
+          );
+        },
+      })
+    );
+  };
 
   return (
     <>
@@ -83,7 +69,9 @@ const index = () => {
             color="primary"
             value={value}
             exclusive
-            onChange={(evt, value) => setValue(value)}
+            onChange={(evt, value) => {
+              setValue(value);
+            }}
           >
             <ToggleButton value={orderItemStatus.PENDING}>
               {orderItemStatus.PENDING}
@@ -107,6 +95,9 @@ const index = () => {
           }}
         >
           {orderItems.map((orderItem) => {
+            if (orderItem.status !== value) {
+              return null;
+            }
             return (
               <CardOrder
                 key={orderItem.id}

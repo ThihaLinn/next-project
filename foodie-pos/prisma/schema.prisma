@@ -161,7 +161,7 @@ model Order {
 
 model OrderCartItem {
   id                Int                 @id @default(autoincrement())
-  itemId            String
+  itemId            String              @unique
   quantity          Int
   status            orderItemStatus
   orderId           Int?

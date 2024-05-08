@@ -6,6 +6,7 @@ import OrderLayout from "./OrderLayout";
 import { useSession } from "next-auth/react";
 import { useAppDispatch, useAppSelector } from "@/store/app/hook";
 import { fetchData } from "@/store/slice/AppSlice";
+import Order from "@/pages/order";
 
 interface prop {
   children?: ReactNode;
@@ -20,6 +21,8 @@ const Layout = ({ children }: prop) => {
 
   const dispatch = useAppDispatch();
   const { init } = useAppSelector((state) => state.app);
+
+  const table = useAppSelector((state) => state.table.tables);
 
   useEffect(() => {
     if (!init) {

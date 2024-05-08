@@ -1,9 +1,10 @@
 import { cartItem } from "@/types/cartItem";
-import { OrderStatus } from "@prisma/client";
+import { OrderCartItem, OrderStatus, orderItemStatus } from "@prisma/client";
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { prisma } from "@/util/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { nanoid } from "nanoid";
+import { json } from "stream/consumers";
 
 export default async function handler(
   req: NextApiRequest,
@@ -26,6 +27,7 @@ export default async function handler(
         data: { totalPrice: updatedOrderPrice },
         where: { id: order.id },
       });
+      let addedCartItems = [];
       for (let cartItem of cartItems) {
         const orderCartItem = await prisma.orderCartItem.create({
           data: {
@@ -35,6 +37,7 @@ export default async function handler(
             orderId: order.id,
           },
         });
+        addedCartItems.push(orderCartItem);
         const orderCartItemMenu = await prisma.orderCartItemMEnu.create({
           data: {
             orderCartItemItemId: orderCartItem.id,
@@ -72,10 +75,9 @@ export default async function handler(
             },
           },
         });
-
       return res.status(200).json({
         order,
-        orderCartItem,
+        orderCartItem: addedCartItems,
         orderCartItemMenu,
         orderCartItemMenuAddon,
       });
@@ -136,10 +138,48 @@ export default async function handler(
     );
 
     return res.status(200).json({
-      order:newOrder,
+      order: newOrder,
       orderCartItem,
       orderCartItemMenu,
       orderCartItemMenuAddon,
     });
+  }
+
+  if (method === "PUT") {
+    const { itemId, status } = JSON.parse(req.body);
+
+    const item = (await prisma.orderCartItem.findFirst({
+      where: { itemId },
+    })) as OrderCartItem;
+
+    const cartItem = await prisma.orderCartItem.update({
+      data: { status },
+      where: { id: item.id },
+    });
+
+    const cartItems = await prisma.orderCartItem.findMany({
+      where: { orderId: cartItem.orderId },
+    });
+
+    let condition: boolean = false;
+
+    cartItems.filter(async (item) => {
+      condition = item.status === orderItemStatus.PAID;
+      if (!condition) {
+        const order = await prisma.order.update({
+          data: { status: OrderStatus.PROCESS },
+          where: { id: cartItem.orderId as number },
+        });
+        res.status(200).json({ cartItem, order });
+      }
+    });
+
+    if (condition) {
+      const order = await prisma.order.update({
+        data: { status: OrderStatus.FINISH },
+        where: { id: cartItem.orderId as number },
+      });
+      res.status(200).json({ cartItem, order });
+    }
   }
 }

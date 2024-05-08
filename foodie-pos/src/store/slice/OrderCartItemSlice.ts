@@ -18,13 +18,20 @@ export const orderCartItemSlice = createSlice({
     setOrderCartItem: (state, action: PayloadAction<OrderCartItem[]>) => {
       state.orderCartItem = action.payload;
     },
-    addOrderCartItem: (state, action: PayloadAction<OrderCartItem>) => {
-      state.orderCartItem.push(action.payload);
+    addOrderCartItem: (state, action: PayloadAction<OrderCartItem[]>) => {
+      action.payload.map((orderCartItem) =>
+        state.orderCartItem.push(orderCartItem)
+      );
+    },
+    updateOrderCartIem: (state, action: PayloadAction<OrderCartItem>) => {
+      state.orderCartItem = state.orderCartItem.map((orderCartItem) =>
+        orderCartItem.id === action.payload.id ? action.payload : orderCartItem
+      );
     },
   },
 });
 
-export const { addOrderCartItem, setOrderCartItem } =
+export const { addOrderCartItem, setOrderCartItem, updateOrderCartIem } =
   orderCartItemSlice.actions;
 
 export default orderCartItemSlice.reducer;

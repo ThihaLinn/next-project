@@ -1,12 +1,12 @@
+import { cartItem } from "@/types/cartItem";
 import { config } from "@/config";
-import { cartItem } from "./../../types/cartItem";
-import { OrderSlice, orderParam } from "@/types/order";
+import { OrderSlice, orderParam, updateOrderParam } from "@/types/order";
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { Order } from "@prisma/client";
 import { stat } from "fs";
 import { addOrderCartItemMenu } from "./OrderCartItemMenuSlice";
 import { addOrderCartItemMenuAddon } from "./OrderCartItemMenuAddonSlice";
-import { addOrderCartItem } from "./OrderCartItemSlice";
+import { addOrderCartItem, updateOrderCartIem } from "./OrderCartItemSlice";
 import { act } from "react-dom/test-utils";
 
 const initialState: OrderSlice = {
@@ -14,6 +14,26 @@ const initialState: OrderSlice = {
   isloading: false,
   error: null,
 };
+
+export const updateOrder = createAsyncThunk(
+  "order/createOrder",
+  async (updateOrder: updateOrderParam, thunkApi) => {
+    const { onSuccess, ...payload } = updateOrder;
+    const response = await fetch(`${config.orderApiUrl}/order`, {
+      method: "PUT",
+      headers: {
+        "content-type": "appliction/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    const dataFromServer = await response.json();
+    const { cartItem, order } = dataFromServer;
+
+    thunkApi.dispatch(updateOrderCartIem(cartItem));
+    thunkApi.dispatch(updataOrder(order));
+    return order;
+  }
+);
 
 export const createOrder = createAsyncThunk(
   "order/createOrder",
@@ -30,7 +50,7 @@ export const createOrder = createAsyncThunk(
     const dataFromServer = await response.json();
     const { order, orderCartItem, orderCartItemMenu, orderCartItemMenuAddon } =
       dataFromServer;
-    
+
     thunkApi.dispatch(setOrder(order));
     thunkApi.dispatch(addOrderCartItem(orderCartItem));
     thunkApi.dispatch(addOrderCartItemMenu(orderCartItemMenu));
@@ -52,12 +72,14 @@ export const orderSlice = createSlice({
     addOrder: (state, action: PayloadAction<Order>) => {
       state.order.push(action.payload);
     },
-    updataOrder: (state, action: PayloadAction<Order[]>) => {
-      state.order = action.payload;
+    updataOrder: (state, action: PayloadAction<Order>) => {
+      state.order = state.order.map((order) =>
+        order.id === action.payload.id ? action.payload : order
+      );
     },
   },
 });
 
-export const { setOrder, addOrder } = orderSlice.actions;
+export const { setOrder, addOrder, updataOrder } = orderSlice.actions;
 
 export default orderSlice.reducer;
