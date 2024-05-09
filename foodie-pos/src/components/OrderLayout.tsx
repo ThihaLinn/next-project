@@ -19,11 +19,11 @@ const OrderLayout = ({ children }: prop) => {
   const tableId = router.query.tableId as string;
 
   useEffect(() => {
-    if (!init) {
+    if (!init && tableId) {
       dispatch(fetchData({ tableId }));
     }
-  }, [init]);
-  return <Box >{children}</Box>;
+  }, [init, tableId]);
+  return <Box>{children}</Box>;
 };
 
 export default OrderLayout;

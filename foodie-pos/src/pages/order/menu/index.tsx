@@ -82,7 +82,6 @@ function index() {
       .filter((ac) => ac?.isRequired === true).length;
 
     setDisable(requiredLength !== selectLength);
-    console.log(requiredLength, selectLength);
   }, [selectAddon]);
 
   const handleCartItem = () => {
@@ -98,12 +97,7 @@ function index() {
   };
 
   const handleUpdateCartItem = () => {
-    console.log({
-      id: cartItem?.id as string,
-      menu: selectMenu as Menu,
-      addons: selectAddon,
-      quantity: quantity,
-    });
+
     dispatch(
       updateCartItem({
         id: cartItem?.id as string,

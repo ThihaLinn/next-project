@@ -24,17 +24,17 @@ const Layout = ({ children }: prop) => {
 
   const table = useAppSelector((state) => state.table.tables);
 
-  useEffect(() => {
-    if (!init) {
-      dispatch(fetchData({}));
-    }
-  }, [init]);
+  // useEffect(() => {
+  //   if (!init) {
+  //     dispatch(fetchData({}));
+  //   }
+  // }, [init]);
 
   if (isBackoffice) {
     return (
       <>
         <BackOfficeLayout>{children}</BackOfficeLayout>
-        {console.log("BackOffice")}
+        {console.log("BackOffice ")}
       </>
     );
   } else if (isOrder) {

@@ -3,7 +3,7 @@ import OrderLayout from "@/components/OrderLayout";
 import { useAppSelector } from "@/store/app/hook";
 import { Box, Tab, Tabs } from "@mui/material";
 import { Menu, Table } from "@prisma/client";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useRouter } from "next/router";
 
@@ -11,6 +11,12 @@ const Order = () => {
   const router = useRouter();
 
   const tableId = Number(router.query.tableId);
+
+  const table = useAppSelector((state) => state.table.tables[0]);
+
+  let haveTable = true;
+
+  const allTable = useAppSelector((state) => state.table.tables);
 
   const [value, setValue] = useState(0);
 
@@ -38,6 +44,8 @@ const Order = () => {
     menu = menu.filter((menu) => menuIds.includes(menu.id));
     setSelect(menu);
   };
+
+  if (!table) return <div>Null</div>;
 
   return (
     <OrderLayout>

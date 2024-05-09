@@ -21,8 +21,6 @@ export default async function handler(
     where: { id: table?.locationId },
   });
 
-  console.log(location,table);
-
   //Company
   const company = await prisma.company.findFirst({
     where: { id: location?.companyId },

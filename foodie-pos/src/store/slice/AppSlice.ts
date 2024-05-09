@@ -37,6 +37,7 @@ const initialState: Appslice = {
 export const fetchData = createAsyncThunk(
   "app/fetchData",
   async ({ tableId }: getAppData, thunkApi) => {
+    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2", tableId);
     const dataFromServer = tableId
       ? await fetch(`${config.orderApiUrl}/app?tableId=${tableId}`)
       : await fetch(`${config.backofficeUrl}/app`);

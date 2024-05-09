@@ -134,7 +134,7 @@ const NewMenuCategoryDialoag = ({ open, setOpen }: prop) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={() => handleMenuCategory()} variant="contained">
+          <Button onClick={() => handleMenuCategory} variant="contained">
             Create
           </Button>
         </DialogActions>

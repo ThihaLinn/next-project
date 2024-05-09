@@ -18,7 +18,6 @@ const Menu = () => {
     (state) => state.app.selectedLocation?.id
   ) as number;
 
-  console.log
 
   return (
     <>
