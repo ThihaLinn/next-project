@@ -23,7 +23,7 @@ import {
 import { Addon } from "@prisma/client";
 import { stat } from "fs";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const index = () => {
   const [open, setOpen] = useState(false);
@@ -48,7 +48,21 @@ const index = () => {
     addonCategoryId: addon?.addOnCategoryId,
   });
 
-  console.log(updateAddon);
+  useEffect(() => {
+    if (addon) {
+      setUpdateAddon({
+        id,
+        name: addon?.name,
+        price: addon?.price,
+        addonCategoryId: addon?.addOnCategoryId,
+      });
+    }
+    if (addon) {
+      setSelect(addon?.addOnCategoryId);
+    }
+  }, [addon]);
+
+  console.log(updateAddon, select);
 
   const handleDelete = () => {
     dispatch(

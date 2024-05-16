@@ -5,6 +5,7 @@ import {
   deleteAddonCategory,
   updateAddonCategory,
 } from "@/store/slice/AddonCategorySlice";
+import { setAddon } from "@/store/slice/AddonSlice";
 import { showSnackBar } from "@/store/slice/SnackBarSlice";
 import { updateAddonCateogryParms } from "@/types/addonCategory";
 import {
@@ -19,7 +20,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const index = () => {
   const [open, setOpen] = useState(false);
@@ -41,8 +42,6 @@ const index = () => {
     (row) => row.addOnCategoryId === id
   );
 
-  console.log(menuAddonCategory);
-
   const menus = useAppSelector((state) => state.menu.menus);
 
   const menuIds: any = menuAddonCategory.map((row) => row.menuId);
@@ -54,6 +53,20 @@ const index = () => {
     isRequired: originalAddonCategory?.isRequired as boolean,
     menuIds: menuIds as [],
   });
+
+  useEffect(() => {
+    if (originalAddonCategory) {
+      setAddonCategory({
+        id,
+        name: originalAddonCategory?.name as string,
+        isRequired: originalAddonCategory?.isRequired as boolean,
+        menuIds: menuIds as [],
+      });
+    }
+    if (menuIds) {
+      setSelect(menuIds);
+    }
+  }, [originalAddonCategory]);
 
   console.log(addonCategory);
 
@@ -142,7 +155,6 @@ const index = () => {
             label="is Required"
             onChange={(e, value) => {
               setAddonCategory({ ...addonCategory, isRequired: value });
-              console.log(addonCategory.isRequired);
             }}
           />
           <Button

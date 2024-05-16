@@ -39,6 +39,7 @@ const NewAddonCategoryDialoag = () => {
   console.log(addonCategory);
 
   const handleAddonCategory = () => {
+    setOpen(false);
     dispatch(
       createAddonCategory({
         ...addonCategory,
